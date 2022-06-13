@@ -1,11 +1,14 @@
 const mongoose = require('mongoose');
 const { encryptAES, decryptAES } = require('../config/PasswordEncoder');
 const User = require('../models/User');
-const CryptoJS = require('crypto-js')
+const CryptoJS = require('crypto-js');
 const router = require('express').Router();
+const jwt = require('jsonwebtoken');
+const validator = require('validator')
 
 router.post('/register', async (req, res) => {
   const body = req.body;
+  if(!validator.isEmail(body.email)) return res.status(400).json({ok:false, message:"Invalid Email Address"})
   const newUser = new User({
     username: body.email.split('@')[0],
     email: body.email,
@@ -16,46 +19,61 @@ router.post('/register', async (req, res) => {
   newUser
     .save(newUser)
     .then(async (user) => {
-      const response = user.toObject();
-      delete response.password;
-      res.status(201).json(response);
+      const { password, ...others } = user._doc;
+      res.status(201).json(others);
     })
     .catch((err) => {
-      res.status(500).json(err);
+      if(err.code === 11000){
+        return res.status(409).json(err.message)
+      }
+      res.status(500).json({message:err.message, code: err.code});
     });
 });
 
 router.post('/login', async (req, res) => {
   try {
-    const timestamps = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+    const timestamps = new Date()
+      .toISOString()
+      .replace(/T/, ' ')
+      .replace(/\..+/, '');
     const body = req.body;
     const user = await User.findOne({ username: body.username });
     if (!user) {
-      return res
-        .status(404)
-        .json({
-          message: 'User not found',
-          code: 404,
-          statusText: 'NOT_FOUND',
-        });
+      return res.status(404).json({
+        message: 'User not found',
+        code: 404,
+        statusText: 'NOT_FOUND',
+      });
     }
 
     const hashedPassword = decryptAES(user.password);
     const password = hashedPassword.toString(CryptoJS.enc.Utf8);
 
     if (body.password !== password) {
-      return res
-        .status(403)
-        .json({
-          message: 'Wrong Password',
-          code: 403,
-          statusText: 'FORBIDDEN',
-        });
+      return res.status(403).json({
+        message: 'Wrong Password',
+        code: 403,
+        statusText: 'FORBIDDEN',
+      });
     }
-
-   return res
+    const accessToken = jwt.sign(
+      {
+        id: user._id,
+        isAdmin: user.isAdmin,
+        username: user.username,
+      },
+      process.env.PASSPHRASE,
+      { expiresIn: '2d' }
+    );
+    return res
       .status(200)
-      .json({ message: "You're logged in", timestamps: timestamps });
+      .json({
+        message: "You're logged in",
+        id: user._id,
+        username: user.username,
+        accessToken: accessToken,
+        timestamps: timestamps,
+      });
   } catch (error) {
     res.status(500).json(error);
   }

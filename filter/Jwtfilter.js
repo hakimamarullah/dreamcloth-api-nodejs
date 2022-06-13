@@ -2,11 +2,11 @@ const jwt = require('jsonwebtoken');
 
 const verifyToken = async (req, res, next) => {
     const authToken = req.headers.authorization;
-    console.log(req.headers);
+
     if (authToken) {
         const token = authToken.split(' ')[1];
         jwt.verify(token, process.env.PASSPHRASE, (err, user) => {
-            if (err) res.status(403).json('Token is invalid');
+            if (err) return res.status(403).json('Token is invalid');
             req.user = user;
             next();
         });
@@ -25,12 +25,12 @@ const verifyTokenAndAuthorization = (req, res, next) => {
     });
 };
 
-const verifyAdmin = (req, res) => {
+const verifyAdmin = (req, res, next) => {
     verifyToken(req, res, () => {
-        if (req.user.isAdmin) {
+        if (req.user && req.user.isAdmin) {
             next();
         } else {
-            res.status(403).json('FORBIDDEN');
+            res.status(403).json('Permission Denied');
         }
     });
 };
