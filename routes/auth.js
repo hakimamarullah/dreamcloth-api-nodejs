@@ -24,7 +24,7 @@ router.post('/register', async (req, res) => {
     })
     .catch((err) => {
       if(err.code === 11000){
-        return res.status(409).json(err.message)
+        return res.status(409).json({message: err.message.substring(7), code: err.code})
       }
       res.status(500).json({message:err.message, code: err.code});
     });
