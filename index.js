@@ -5,6 +5,8 @@ const dotenv = require('dotenv');
 const userRoutes = require('./routes/user');
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/product');
+const cartRoutes = require('./routes/cart')
+const orderRoutes = require('./routes/order')
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;
@@ -13,6 +15,8 @@ app.use(express.json());
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/products', productRoutes);
+app.use('/api/v1/carts', cartRoutes);
+app.use('/api/v1/orders', orderRoutes);
 
 mongoose.connection.on('connected', () => {
   console.log('Connection successfull');
@@ -29,7 +33,7 @@ mongoose.connection.on('disconnected', () =>
 process.stdin.resume();
 const closeDatabaseConnection = () => {
   mongoose.connection.close(() => {
-    console.warn('Database connection has been disconnected...');
+    console.warn('Database connection closed!');
     process.exit(0)
   });
 };

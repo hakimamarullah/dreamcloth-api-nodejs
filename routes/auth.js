@@ -17,7 +17,7 @@ router.post('/register', async (req, res) => {
   });
 
   newUser
-    .save(newUser)
+    .save()
     .then(async (user) => {
       const { password, ...others } = user._doc;
       res.status(201).json(others);
