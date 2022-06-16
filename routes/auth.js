@@ -17,7 +17,7 @@ router.post('/register', async (req, res) => {
   });
 
   newUser
-    .save(newUser)
+    .save()
     .then(async (user) => {
       const { password, ...others } = user._doc;
       res.status(201).json(others);
@@ -47,9 +47,9 @@ router.post('/login', async (req, res) => {
     }
 
     const hashedPassword = decryptAES(user.password);
-    const password = hashedPassword.toString(CryptoJS.enc.Utf8);
+    const originalPassword = hashedPassword.toString(CryptoJS.enc.Utf8);
 
-    if (body.password !== password) {
+    if (body.password !== originalPassword) {
       return res.status(403).json({
         message: 'Wrong Password',
         code: 403,
@@ -65,12 +65,12 @@ router.post('/login', async (req, res) => {
       process.env.PASSPHRASE,
       { expiresIn: '2d' }
     );
+
     return res
       .status(200)
       .json({
         message: "You're logged in",
-        id: user._id,
-        username: user.username,
+        ...others,
         accessToken: accessToken,
         timestamps: timestamps,
       });
