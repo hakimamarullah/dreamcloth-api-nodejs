@@ -66,7 +66,6 @@ router.post('/login', async (req, res) => {
       { expiresIn: '2d' }
     );
 
-    const {password, ...others} = user._doc;
     return res
       .status(200)
       .json({
