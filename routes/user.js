@@ -3,7 +3,6 @@ const { verifyTokenAndAuthorization, verifyAdmin } = require('../filter/Jwtfilte
 const User = require('../models/User');
 
 router.put('/:id', verifyTokenAndAuthorization, async (req, res) => {
-
     User.findByIdAndUpdate(
       req.params.id,
       {
@@ -23,5 +22,4 @@ router.get("/", verifyAdmin, async (req, res)=>{
         res.status(200).json(data)
     })
 })
-
 module.exports = router;
