@@ -19,7 +19,7 @@ router.post('/', verifyAdmin, async (req, res) => {
         .catch(err => res.status(500).json({ message: err.message, ok: false }));
 });
 
-router.get('/', verifyToken, async (req, res) => {
+router.get('/', async (req, res) => {
     const queryNew = req.query.new;
     const queryCategory = req.query.category;
     let products;
@@ -41,7 +41,7 @@ router.get('/', verifyToken, async (req, res) => {
     }
 });
 
-router.get('/:id', verifyToken, async (req, res) => {
+router.get('/:id', async (req, res) => {
     Product.findOne({ _id: req.params.id })
         .then((product) => {
             if (!product) throw new Error('Product Not Found');
