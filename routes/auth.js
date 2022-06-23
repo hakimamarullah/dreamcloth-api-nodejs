@@ -4,11 +4,14 @@ const User = require('../models/User');
 const CryptoJS = require('crypto-js');
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
-const validator = require('validator')
+const validator = require('validator');
 
 router.post('/register', async (req, res) => {
   const body = req.body;
-  if(!validator.isEmail(body.email)) return res.status(400).json({ok:false, message:"Invalid Email Address"})
+  if (!validator.isEmail(body.email))
+    return res
+      .status(400)
+      .json({ ok: false, message: 'Invalid Email Address' });
   const newUser = new User({
     username: body.email.split('@')[0],
     email: body.email,
@@ -23,10 +26,12 @@ router.post('/register', async (req, res) => {
       res.status(201).json(others);
     })
     .catch((err) => {
-      if(err.code === 11000){
-        return res.status(409).json({message: err.message.substring(7), code: err.code})
+      if (err.code === 11000) {
+        return res
+          .status(409)
+          .json({ message: err.message.substring(7), code: err.code });
       }
-      res.status(500).json({message:err.message, code: err.code});
+      res.status(500).json({ message: err.message, code: err.code });
     });
 });
 
@@ -66,16 +71,15 @@ router.post('/login', async (req, res) => {
       { expiresIn: '2d' }
     );
 
-    return res
-      .status(200)
-      .json({
-        message: "You're logged in",
-        ...others,
-        accessToken: accessToken,
-        timestamps: timestamps,
-      });
-
+    const { password, ...others } = user._doc;
+    return res.status(200).json({
+      message: "You're logged in",
+      ...others,
+      accessToken: accessToken,
+      timestamps: timestamps,
+    });
   } catch (error) {
+    console.error(error);
     res.status(500).json(error);
   }
 });
