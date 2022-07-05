@@ -18,6 +18,7 @@ const whitelist = [
   'https://dreamcloth.netlify.app',
   'https://dreamcloth-dev.netlify.app',
   'http://localhost:8000',
+  'http://localhost:3001',
 ];
 app.use(
   cors({
